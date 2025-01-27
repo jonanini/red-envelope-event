@@ -7,8 +7,8 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
       text-align: center;
+      padding: 20px;
     }
     h1 {
       color: #d32f2f;
@@ -17,19 +17,19 @@
       display: flex;
       justify-content: center;
       gap: 20px;
+      flex-wrap: wrap;
       margin-top: 20px;
     }
     .red-envelope {
       width: 100px;
       height: 150px;
-      background-color: red;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 10px;
+      background-image: url('https://via.placeholder.com/100x150/FF0000/FFFFFF?text=紅包');
+      background-size: cover;
+      background-position: center;
       cursor: pointer;
-      transition: transform 0.2s;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      transition: transform 0.2s, border-color 0.2s;
     }
     .red-envelope:hover {
       transform: scale(1.1);
@@ -54,110 +54,102 @@
     .hidden {
       display: none;
     }
-    #result {
+    .winner-form {
       margin-top: 20px;
-      font-size: 18px;
+      text-align: left;
+      display: none;
+    }
+    .form-field {
+      margin-bottom: 10px;
+    }
+    .form-field label {
       font-weight: bold;
+    }
+    .form-field input {
+      width: 100%;
+      padding: 5px;
     }
   </style>
 </head>
 <body>
   <h1>抽紅包活動</h1>
+  <p>請選擇一個紅包並按下「送出」按鈕</p>
 
-  <!-- 後台設定區 -->
-  <div id="backend-settings">
-    <h2>活動設定區</h2>
-    <div>
-      <label>中獎機率 (0-100%)：</label>
-      <input type="number" id="winning-rate" value="50">
-    </div>
-    <div>
-      <label>新增獎項：</label>
-      <input type="text" id="prize-input" placeholder="輸入獎項">
-      <button onclick="addPrize()">新增</button>
-    </div>
-    <div>
-      <h3>獎項清單</h3>
-      <ul id="prize-list"></ul>
-    </div>
+  <!-- 紅包選擇區 -->
+  <div class="red-envelope-container">
+    <!-- 六個紅包 -->
+    <div class="red-envelope" onclick="selectEnvelope(1)"></div>
+    <div class="red-envelope" onclick="selectEnvelope(2)"></div>
+    <div class="red-envelope" onclick="selectEnvelope(3)"></div>
+    <div class="red-envelope" onclick="selectEnvelope(4)"></div>
+    <div class="red-envelope" onclick="selectEnvelope(5)"></div>
+    <div class="red-envelope" onclick="selectEnvelope(6)"></div>
   </div>
+  <button class="button" onclick="revealPrize()">送出</button>
+  <p id="result" class="hidden"></p>
 
-  <!-- 前台互動區 -->
-  <div id="frontend-interaction">
-    <h2>選擇一個紅包</h2>
-    <div class="red-envelope-container">
-      <!-- 5 個紅包 -->
-      <div class="red-envelope" onclick="selectEnvelope(1)">紅包 1</div>
-      <div class="red-envelope" onclick="selectEnvelope(2)">紅包 2</div>
-      <div class="red-envelope" onclick="selectEnvelope(3)">紅包 3</div>
-      <div class="red-envelope" onclick="selectEnvelope(4)">紅包 4</div>
-      <div class="red-envelope" onclick="selectEnvelope(5)">紅包 5</div>
+  <!-- 領獎資訊表單 -->
+  <div class="winner-form" id="winner-form">
+    <h3>請填寫領獎資訊</h3>
+    <div class="form-field">
+      <label for="name">姓名：</label>
+      <input type="text" id="name" required>
     </div>
-    <button class="button" onclick="revealPrize()">送出</button>
-    <p id="result" class="hidden"></p>
+    <div class="form-field">
+      <label for="phone">行動電話：</label>
+      <input type="text" id="phone" required>
+    </div>
+    <div class="form-field">
+      <label for="address">地址：</label>
+      <input type="text" id="address" required>
+    </div>
+    <div class="form-field">
+      <label for="email">Email：</label>
+      <input type="email" id="email" required>
+    </div>
+    <button class="button" onclick="submitWinnerInfo()">提交</button>
   </div>
 
   <script>
-    const prizeList = [];
+    const prizeList = ['紅包1', '紅包2', '紅包3', '紅包4', '紅包5', '紅包6']; // 模擬獎項
     let selectedEnvelope = null;
-
-    // 新增獎項
-    function addPrize() {
-      const prize = document.getElementById("prize-input").value;
-      if (prize) {
-        prizeList.push(prize);
-        const listItem = document.createElement("li");
-        listItem.textContent = prize;
-        document.getElementById("prize-list").appendChild(listItem);
-        document.getElementById("prize-input").value = "";
-      } else {
-        alert("請輸入獎項！");
-      }
-    }
 
     // 選擇紅包
     function selectEnvelope(number) {
-      // 清除之前的選擇
-      document.querySelectorAll(".red-envelope").forEach(env => {
-        env.classList.remove("selected");
-      });
-
-      // 標記當前選擇
+      document.querySelectorAll('.red-envelope').forEach(env => env.classList.remove('selected'));
       const selected = document.querySelector(`.red-envelope:nth-child(${number})`);
-      selected.classList.add("selected");
-
-      // 設置選擇的紅包編號
+      selected.classList.add('selected');
       selectedEnvelope = number;
     }
 
     // 按下送出按鈕後顯示結果
     function revealPrize() {
-      const winningRate = parseInt(document.getElementById("winning-rate").value);
-
       if (!selectedEnvelope) {
-        alert("請選擇一個紅包！");
+        alert('請選擇一個紅包！');
         return;
       }
 
-      if (prizeList.length === 0) {
-        alert("目前沒有可用的獎項，請先設定獎項！");
+      const prize = prizeList[selectedEnvelope - 1];
+      document.getElementById('result').textContent = `恭喜您獲得：${prize}`;
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('winner-form').style.display = 'block';
+    }
+
+    // 提交領獎資訊
+    function submitWinnerInfo() {
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const address = document.getElementById('address').value;
+      const email = document.getElementById('email').value;
+
+      if (!name || !phone || !address || !email) {
+        alert('請填寫完整資訊！');
         return;
       }
 
-      const randomNum = Math.random() * 100;
-
-      if (randomNum < winningRate) {
-        // 中獎
-        const randomIndex = Math.floor(Math.random() * prizeList.length);
-        const prize = prizeList[randomIndex];
-        document.getElementById("result").textContent = `恭喜！你選擇的紅包 ${selectedEnvelope} 中獎，獎品是：${prize}`;
-      } else {
-        // 沒有中獎
-        document.getElementById("result").textContent = `很遺憾！你選擇的紅包 ${selectedEnvelope} 沒有中獎！`;
-      }
-
-      // 顯示結果
-      document.getElementById("result").classList.remove("hidden");
+      console.log('領獎資訊提交成功：', { name, phone, address, email });
+      alert('領獎資訊已提交，感謝參與！');
+      document.getElementById('winner-form').style.display = 'none';
     }
   </script>
 </body>
